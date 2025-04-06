@@ -1,3 +1,5 @@
+use std::vec;
+
 const UP: (i32, i32) = (0, -1);
 const DOWN: (i32, i32) = (0, 1);
 const LEFT: (i32, i32) = (-1, 0);
@@ -28,15 +30,16 @@ impl Snake {
     }
 
     pub fn mv(&mut self, new_head_position: (i32, i32)) {
-        let body_c = self.body.clone();
-        for (i, p) in body_c.iter().enumerate() {
-            // IS ON SECOND TO LAST ELEMENT
-            if i == body_c.len() - 2 {
-                continue;
-            }
-            self.body[i + 1] = *p;
+        // Move the body segments forward
+        let mut body_c = self.body.clone();
+
+        for i in (1..body_c.len()).rev() {
+            self.body[i] = body_c[i - 1];
         }
-        self.body[0] = self.head;
+
+        if !self.body.is_empty() {
+            self.body[0] = self.head;
+        }
         self.head = new_head_position;
     }
 
