@@ -24,6 +24,10 @@ pub fn main() {
                 fitness: 0.0,
             })
             .collect();
+
+        for agent in &mut population {
+            agent.run_game(500);
+        }
     } else {
         println!("Opening Window ... ");
 
