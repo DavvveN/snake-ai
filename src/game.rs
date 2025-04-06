@@ -5,9 +5,9 @@ const GRID_WIDTH: i32 = 20;
 const GRID_HEIGHT: i32 = 20;
 
 pub struct Game {
-    fruit_position: (i32, i32),
-    snake: Snake,
-    game_over: bool,
+    pub fruit_position: (i32, i32),
+    pub snake: Snake,
+    pub game_over: bool,
 }
 
 impl Game {
@@ -200,5 +200,14 @@ impl Game {
         out.push(self.snake.body.len() as f32 / max_length as f32);
 
         out
+    }
+
+    pub fn set_direction(&mut self, direction: usize) {
+        let current = self.snake.direction;
+        let opposite = (current + 2) % 4;
+
+        if direction != opposite {
+            self.snake.direction = direction;
+        }
     }
 }
