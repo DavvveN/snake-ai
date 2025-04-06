@@ -210,4 +210,16 @@ impl Game {
             self.snake.direction = direction;
         }
     }
+
+    pub fn compute_fitness(&self, steps_survived: u32) -> f32 {
+        let fruits_eaten = (self.snake.body.len() as u32).saturating_sub(1);
+
+        let mut fitness = (steps_survived as f32).powf(1.2) + (fruits_eaten.pow(2) * 100) as f32;
+
+        if self.game_over && fruits_eaten == 0 {
+            fitness -= 50.0;
+        }
+
+        fitness.max(0.0)
+    }
 }
