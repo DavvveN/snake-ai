@@ -1,4 +1,5 @@
 mod game;
+mod gui;
 mod snake;
 
 use game::Game;
