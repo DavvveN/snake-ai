@@ -8,6 +8,8 @@ pub struct Game {
     pub fruit_position: (i32, i32),
     pub snake: Snake,
     pub game_over: bool,
+    pub steps_survived: u32,
+    pub steps_without_fruit: u32,
 }
 
 impl Game {
@@ -20,6 +22,8 @@ impl Game {
             ),
             snake: Snake::new(),
             game_over: false,
+            steps_survived: 0,
+            steps_without_fruit: 0,
         }
     }
 
@@ -42,6 +46,8 @@ impl Game {
     }
 
     pub fn next_step(&mut self) -> bool {
+        self.steps_survived += 1;
+
         let next_pos = (
             self.snake.head.0 as i32 + DIRECTIONS[self.snake.direction].0,
             self.snake.head.1 as i32 + DIRECTIONS[self.snake.direction].1,
@@ -61,9 +67,11 @@ impl Game {
         }
 
         self.snake.mv(next_pos);
+        self.steps_without_fruit += 1;
         if next_pos == self.fruit_position {
             self.snake.grow();
             self.randomize_fruit();
+            self.steps_without_fruit = 0;
         }
         true
     }
@@ -209,5 +217,23 @@ impl Game {
         if direction != opposite {
             self.snake.direction = direction;
         }
+    }
+
+    pub fn compute_fitness(&self, steps_survived: u32) -> f32 {
+        let fruits_eaten = (self.snake.body.len() as u32).saturating_sub(1);
+
+        let mut fitness = (steps_survived as f32).powf(1.2) + (fruits_eaten.pow(2) * 100) as f32;
+
+        //penalize dying early
+        if self.game_over && fruits_eaten == 0 {
+            fitness -= 50.0;
+        }
+
+        //penalize going in circles and such
+        if self.steps_without_fruit >= 25 {
+            fitness -= 10.0;
+        }
+
+        fitness.max(0.0)
     }
 }
