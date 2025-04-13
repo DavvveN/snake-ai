@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use ggez::{
     event,
-    graphics::{self, Color},
+    graphics::{self, Color, Text},
     input::keyboard::KeyCode,
     Context, GameResult,
 };
@@ -137,6 +137,13 @@ impl event::EventHandler<ggez::GameError> for AppState {
         .expect("COULDNT CREATE RECTANGLE FROM BLOCK");
 
         canvas.draw(&fruit, graphics::DrawParam::default());
+
+        let mut text = Text::new(format!("Score: {}",self.game.snake.body.len() - 1).to_string());
+        text.set_scale(40.0);
+        canvas.draw(
+            &text,
+            graphics::DrawParam::from([600.0, 100.0]).color(Color::from_rgb(20,135,66)),
+        );
 
         canvas.finish(ctx)?;
 

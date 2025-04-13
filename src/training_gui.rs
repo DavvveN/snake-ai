@@ -1,9 +1,8 @@
 use ggez::{
     event,
-    graphics::{self, Color},
+    graphics::{self, Color, Text},
     Context, GameResult,
 };
-use rand::Rng;
 
 use crate::{agent::Agent, game::Game};
 
@@ -28,7 +27,7 @@ impl TrainingState {
 }
 
 impl event::EventHandler<ggez::GameError> for TrainingState {
-    fn update(&mut self, ctx: &mut Context) -> GameResult {
+    fn update(&mut self, _ctx: &mut Context) -> GameResult {
         self.tick += 1;
 
         if self.tick % 5 == 0 {
@@ -115,6 +114,13 @@ impl event::EventHandler<ggez::GameError> for TrainingState {
         .expect("COULDNT CREATE RECTANGLE FROM BLOCK");
 
         canvas.draw(&fruit, graphics::DrawParam::default());
+
+        let mut text = Text::new(format!("Score: {}",self.game.snake.body.len() - 1).to_string());
+        text.set_scale(40.0);
+        canvas.draw(
+            &text,
+            graphics::DrawParam::from([600.0, 100.0]).color(Color::from_rgb(20,135,66)),
+        );
 
         canvas.finish(ctx)?;
 
