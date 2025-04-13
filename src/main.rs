@@ -13,6 +13,7 @@ use game_gui::AppState;
 use rand::Rng;
 
 const POP_SIZE: i32 = 100;
+const ITERATIONS : usize = 5;
 
 pub fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -23,39 +24,19 @@ pub fn main() {
             .map(|_| Agent {
                 brain: Brain::random(),
                 fitness: 0.0,
+                score : 0,
             })
             .collect();
-
-        println!("Starting game on {} agents...", POP_SIZE);
-        for agent in &mut population {
-            agent.run_game(500);
+        
+        for i in 0..ITERATIONS{
+            println!("Starting training cycle {} ...", i );
+            population = train_population(&mut population);
         }
 
-        println!("Evaluating Agents...");
-        population.sort_by(|a,b|{
-            a.fitness.partial_cmp(&b.fitness).unwrap()
-        });
+        population.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
 
-        // Take top 10% of agents
-        let elite_population : Vec<Agent> = population[90..].to_vec();
-        let mut new_population: Vec<Agent> = Vec::new();
+        println!("\n Best Snake: \n fitness: {} \n Score: {}", population[0].fitness, population[0].score);
 
-        //The previous elite becomes part of the new generation
-        for elite in &elite_population {
-            new_population.push(elite.clone());
-        }
-
-        //Crossover between the previous elites
-        // Fill the rest via crossover + mutation
-        let mut rng = rand::rng();
-        while new_population.len() < population.len() {
-            let parent1 = elite_population[rng.random_range(0..elite_population.len())].clone();
-            let parent2 = elite_population[rng.random_range(0..elite_population.len())].clone();
-            
-            let mut child = Agent::crossover(&parent1, &parent2);
-            child.mutate(); // Apply mutation if you have this method
-            new_population.push(child);
-        }
 
 
     } else {
@@ -70,4 +51,47 @@ pub fn main() {
         let state = AppState::new(&mut contex).expect("Failed to create state.");
         event::run(contex, event_loop, state) // Run window event loop
     }
+}
+
+pub fn train_population(population: &mut Vec<Agent>) -> Vec<Agent> {
+    println!("Starting game on {} agents...", population.len());
+
+    for agent in population.iter_mut() {
+        agent.run_game(50000);
+    }
+
+    println!("Evaluating Agents...");
+
+    // Sort by fitness in descending order
+    population.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
+
+    // Take top 10% as elites
+    let elite_count = (population.len() as f32 * 0.1).ceil() as usize;
+    let elite_population: Vec<Agent> = population[..elite_count].to_vec();
+
+    let mut new_population: Vec<Agent> = Vec::new();
+
+    // Keep the elite
+    for elite in &elite_population {
+        new_population.push(elite.clone());
+    }
+
+    // Reproduce until population is full
+    let mut rng = rand::rng();
+    while new_population.len() < population.len() {
+        let i = rng.random_range(0..elite_population.len());
+        let mut j = rng.random_range(0..elite_population.len());
+        while j == i {
+            j = rng.random_range(0..elite_population.len());
+        }
+
+        let parent1 = &elite_population[i];
+        let parent2 = &elite_population[j];
+
+        let mut child = Agent::crossover(parent1, parent2);
+        child.mutate(); // Apply mutation
+        new_population.push(child);
+    }
+
+    new_population
 }

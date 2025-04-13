@@ -1,10 +1,14 @@
+use rand::Rng;
+
 use crate::brain::Brain;
 use crate::game::Game;
 
+const MUTATION_RATE : f32 = 0.05;
 #[derive(Debug, Clone   )]
 pub struct Agent {
     pub brain: Brain,
     pub fitness: f32,
+    pub score : u32,
 }
 
 impl Agent {
@@ -23,12 +27,13 @@ impl Agent {
 
             game.next_step();
 
-        }
+        }   
+        self.score = game.steps_survived;
         self.fitness = game.compute_fitness(game.steps_survived);
     }
 
     pub fn crossover(parent1 : &Agent, parent2 : &Agent) -> Agent {
-        let mut child = Agent{brain : Brain::random(), fitness : 0.0};
+        let mut child = Agent{brain : Brain::random(), fitness : 0.0, score : 0};
         for i in 0..child.brain.weights.len() {
             child.brain.weights[i] = if rand::random() {
                 parent1.brain.weights[i]
@@ -40,7 +45,12 @@ impl Agent {
         child 
     }
 
-    pub fn mutate(&self){
-        
+    pub fn mutate(&mut self){
+        let mut rng = rand::rng();
+        for weight in &mut self.brain.weights.iter_mut() {
+            if rng.random::<f32>() < MUTATION_RATE {
+                *weight += rng.random_range(-0.1..0.1); // small perturbation
+            }
+        }
     }
 }
