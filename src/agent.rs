@@ -1,6 +1,7 @@
 use crate::brain::Brain;
 use crate::game::Game;
 
+#[derive(Debug, Clone   )]
 pub struct Agent {
     pub brain: Brain,
     pub fitness: f32,
@@ -19,8 +20,27 @@ impl Agent {
                 2 => game.snake.turn_right(),
                 _ => panic!("Invalid Action"),
             }
+
+            game.next_step();
+
         }
-        game.next_step();
         self.fitness = game.compute_fitness(game.steps_survived);
+    }
+
+    pub fn crossover(parent1 : &Agent, parent2 : &Agent) -> Agent {
+        let mut child = Agent{brain : Brain::random(), fitness : 0.0};
+        for i in 0..child.brain.weights.len() {
+            child.brain.weights[i] = if rand::random() {
+                parent1.brain.weights[i]
+            } else {
+                parent2.brain.weights[i]
+            };
+        }
+
+        child 
+    }
+
+    pub fn mutate(&self){
+        
     }
 }
