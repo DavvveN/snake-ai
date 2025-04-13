@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod tests {
+    use rand::Rng;
+
     use crate::Agent;
     use crate::Brain;
     use crate::train_population;
@@ -8,11 +10,14 @@ mod tests {
     #[test]
 
     fn test_iterative_traing(){
+        let mut rng = rand::rng();
+
         let mut population: Vec<Agent> = (0..100)
             .map(|_| Agent {
                 brain: Brain::random(),
                 fitness: 0.0,
                 score : 0,
+                id : rng.random()
             })
             .collect();
         population.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());

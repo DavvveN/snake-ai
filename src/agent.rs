@@ -9,11 +9,12 @@ pub struct Agent {
     pub brain: Brain,
     pub fitness: f32,
     pub score : u32,
+    pub id : u64
 }
 
 impl Agent {
     pub fn run_game(&mut self, max_steps: u32) {
-        let mut game = Game::new();
+        let mut game = Game::new(self.id);
         while !game.game_over && game.steps_survived < max_steps {
             let state = game.state_extraction();
             let action = self.brain.decide(&state);
@@ -28,12 +29,14 @@ impl Agent {
             game.next_step();
 
         }   
-        self.score = game.steps_survived;
+        self.score = (game.snake.body.len() + 1) as u32;
         self.fitness = game.compute_fitness(game.steps_survived);
     }
 
     pub fn crossover(parent1 : &Agent, parent2 : &Agent) -> Agent {
-        let mut child = Agent{brain : Brain::random(), fitness : 0.0, score : 0};
+        let mut rng = rand::rng();
+
+        let mut child = Agent{brain : Brain::random(), fitness : 0.0, score : 0, id : rng.random()};
         for i in 0..child.brain.weights.len() {
             child.brain.weights[i] = if rand::random() {
                 parent1.brain.weights[i]

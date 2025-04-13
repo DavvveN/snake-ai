@@ -10,11 +10,12 @@ pub struct Game {
     pub game_over: bool,
     pub steps_survived: u32,
     pub steps_without_fruit: u32,
+    pub id : u64,
 }
 
 impl Game {
-    pub fn new() -> Self {
-        let mut rng = rand::rng();
+    pub fn new(id : u64) -> Self {
+        let mut rng = rand::rngs::StdRng::seed_from_u64(id);
         Self {
             fruit_position: (
                 rng.random_range(0..GRID_WIDTH),
@@ -24,11 +25,12 @@ impl Game {
             game_over: false,
             steps_survived: 0,
             steps_without_fruit: 0,
+            id
         }
     }
 
     fn randomize_fruit(&mut self) {
-        let mut rng = rand::rng();
+        let mut rng = rand::rngs::StdRng::seed_from_u64(self.id);
 
         let mut pos = (
             rng.random_range(0..GRID_WIDTH),
@@ -204,19 +206,23 @@ impl Game {
 
     pub fn compute_fitness(&self, steps_survived: u32) -> f32 {
         let fruits_eaten = (self.snake.body.len() as u32).saturating_sub(1);
-
-        let mut fitness = (steps_survived as f32).powf(1.2) + (fruits_eaten.pow(2) * 100) as f32;
-
-        //penalize dying early
+    
+        let fruit_reward = (fruits_eaten.pow(2) * 1000) as f32;
+        
+        let survival_reward = (steps_survived as f32).powf(0.8);  
+        
+        let mut fitness = survival_reward + fruit_reward;
+    
+        fitness += (fruits_eaten * 500) as f32;  
+        
         if self.game_over && fruits_eaten == 0 {
-            fitness -= 50.0;
+            fitness -= 100.0;  // 
+    
         }
-
-        //penalize going in circles and such
-        if self.steps_without_fruit >= 25 {
-            fitness -= 10.0;
+        if self.steps_without_fruit >= 20 {  
+            fitness -= self.steps_without_fruit as f32 * 1.5;
         }
-
+    
         fitness.max(0.0)
     }
 }

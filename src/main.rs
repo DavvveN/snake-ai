@@ -3,6 +3,7 @@ mod brain;
 mod game;
 mod game_gui;
 mod snake;
+mod training_gui;
 
 use ggez::{conf, event, ContextBuilder};
 
@@ -10,20 +11,23 @@ use agent::Agent;
 use brain::Brain;
 use game_gui::AppState;
 use rand::Rng;
+use training_gui::TrainingState;
 
 const POP_SIZE: i32 = 100;
-const ITERATIONS : usize = 5;
+const ITERATIONS : usize = 100;
 
 pub fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.contains(&"--train".to_string()) {
         println!("Training the Snake AI...");
+        let mut rng = rand::rng();
 
         let mut population: Vec<Agent> = (0..POP_SIZE)
             .map(|_| Agent {
                 brain: Brain::random(),
                 fitness: 0.0,
                 score : 0,
+                id : rng.random(),
             })
             .collect();
         
@@ -36,6 +40,18 @@ pub fn main() {
 
         println!("\n Best Snake: \n fitness: {} \n Score: {}", population[0].fitness, population[0].score);
 
+        let best_agent = population[0].clone();
+
+        println!("Opening Window ... ");
+
+        let context_builder = ContextBuilder::new("Snake-AI", "David Nilsson")
+            .window_setup(conf::WindowSetup::default().title("Snake-AI"))
+            .window_mode(conf::WindowMode::default().resizable(true));
+
+        let (mut contex,event_loop) =
+            context_builder.build().expect("Failed to build context.");
+        let state = TrainingState::new(&mut contex, best_agent).expect("Failed to create state.");
+        event::run(contex, event_loop, state) // Run window event loop
 
 
     } else {
@@ -56,7 +72,7 @@ pub fn train_population(population: &mut Vec<Agent>) -> Vec<Agent> {
     println!("Starting game on {} agents...", population.len());
 
     for agent in population.iter_mut() {
-        agent.run_game(50000);
+        agent.run_game(5000);
     }
 
     println!("Evaluating Agents...");
