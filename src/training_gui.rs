@@ -1,67 +1,45 @@
-use std::collections::VecDeque;
-
 use ggez::{
     event,
     graphics::{self, Color},
-    input::keyboard::KeyCode,
     Context, GameResult,
 };
 use rand::Rng;
 
-use crate::game::Game;
+use crate::{agent::Agent, game::Game};
 
 const TOP_LEFT_CORNER: (i32, i32) = (50, 50);
 const SQUARE_SIZE: i32 = 25;
-pub struct AppState {
+pub struct TrainingState {
     game: Game,
     tick: u32,
-    inputs: VecDeque<usize>,
+    agent : Agent,
 }
 
-impl AppState {
-    pub fn new(_ctx: &mut Context) -> GameResult<AppState> {
-        let mut rng = rand::rng();
-
-        let state = AppState {
-            game: Game::new(rng.random()),
+impl TrainingState {
+    pub fn new(_ctx: &mut Context, agent : Agent) -> GameResult<TrainingState> {
+        let state = TrainingState {
+            game: Game::new(agent.id),
             tick: 0,
-            inputs: VecDeque::new(),
+            agent,
         };
 
         Ok(state)
     }
 }
 
-impl event::EventHandler<ggez::GameError> for AppState {
+impl event::EventHandler<ggez::GameError> for TrainingState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         self.tick += 1;
 
-        if ctx.keyboard.is_key_just_pressed(KeyCode::Up) {
-            self.inputs.push_back(0);
-        }
-
-        if ctx.keyboard.is_key_just_pressed(KeyCode::Right) {
-            self.inputs.push_back(1);
-        }
-
-        if ctx.keyboard.is_key_just_pressed(KeyCode::Down) {
-            self.inputs.push_back(2);
-        }
-
-        if ctx.keyboard.is_key_just_pressed(KeyCode::Left) {
-            self.inputs.push_back(3);
-        }
-
         if self.tick % 5 == 0 {
-            if !self.inputs.is_empty() {
-                let current = self.game.snake.direction;
-                let opposite = (current + 2) % 4;
-                let dir = self.inputs.pop_front().unwrap();
+            let state = self.game.state_extraction();
+            let action = self.agent.brain.decide(&state);
 
-                // Only change direction if not trying to go backwards
-                if dir != opposite {
-                    self.game.snake.direction = dir;
-                }
+            match action {
+                0 => self.game.snake.turn_left(),
+                1 => {}
+                2 => self.game.snake.turn_right(),
+                _ => panic!("Invalid Action"),
             }
 
             self.game.next_step();
