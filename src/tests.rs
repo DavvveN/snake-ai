@@ -17,7 +17,7 @@ mod tests {
             .collect();
         population.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
         let mut elites : Vec<f32> = Vec::new(); 
-        for i in 0..5{
+        for _ in 0..5{
             elites.push(population[0].fitness.clone());
             population = train_population(&mut population);
             population.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
