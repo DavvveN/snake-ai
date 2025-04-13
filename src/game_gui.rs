@@ -18,8 +18,8 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(ctx: &mut Context) -> GameResult<AppState> {
-        let mut state = AppState {
+    pub fn new(_ctx: &mut Context) -> GameResult<AppState> {
+        let state = AppState {
             game: Game::new(),
             tick: 0,
             inputs: VecDeque::new(),
