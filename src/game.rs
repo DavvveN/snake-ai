@@ -55,13 +55,11 @@ impl Game {
 
         if next_pos.0 >= GRID_WIDTH || next_pos.0 < 0 || next_pos.1 < 0 || next_pos.1 >= GRID_HEIGHT
         {
-            println!("SNAKE HAS HIT A WALL");
             self.game_over = true;
             return false;
         }
 
         if self.snake.body.contains(&next_pos) {
-            println!("SNAKE HAS HIT ITSELF");
             self.game_over = true;
             return false;
         }

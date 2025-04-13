@@ -10,6 +10,7 @@ use agent::Agent;
 use brain::Brain;
 use game::Game;
 use game_gui::AppState;
+use rand::Rng;
 
 const POP_SIZE: i32 = 100;
 
@@ -25,9 +26,38 @@ pub fn main() {
             })
             .collect();
 
+        println!("Starting game on {} agents...", POP_SIZE);
         for agent in &mut population {
             agent.run_game(500);
         }
+
+        println!("Evaluating Agents...");
+        population.sort_by(|a,b|{
+            a.fitness.partial_cmp(&b.fitness).unwrap()
+        });
+
+        // Take top 10% of agents
+        let elite_population : Vec<Agent> = population[90..].to_vec();
+        let mut new_population: Vec<Agent> = Vec::new();
+
+        //The previous elite becomes part of the new generation
+        for elite in &elite_population {
+            new_population.push(elite.clone());
+        }
+
+        //Crossover between the previous elites
+        // Fill the rest via crossover + mutation
+        let mut rng = rand::rng();
+        while new_population.len() < population.len() {
+            let parent1 = elite_population[rng.random_range(0..elite_population.len())].clone();
+            let parent2 = elite_population[rng.random_range(0..elite_population.len())].clone();
+            
+            let mut child = Agent::crossover(&parent1, &parent2);
+            child.mutate(); // Apply mutation if you have this method
+            new_population.push(child);
+        }
+
+
     } else {
         println!("Opening Window ... ");
 
