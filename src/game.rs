@@ -1,5 +1,5 @@
 use crate::snake::{Snake, DIRECTIONS};
-use rand::{prelude::*, rngs};
+use rand::prelude::*;
 
 const GRID_WIDTH: i32 = 20;
 const GRID_HEIGHT: i32 = 20;
@@ -74,13 +74,6 @@ impl Game {
         true
     }
 
-    pub fn turn_left(&mut self) {
-        self.snake.turn_left();
-    }
-
-    pub fn turn_right(&mut self) {
-        self.snake.turn_right();
-    }
 
     // OUT contains
     // 0 - direction 0 - 3
@@ -208,14 +201,6 @@ impl Game {
         out
     }
 
-    pub fn set_direction(&mut self, direction: usize) {
-        let current = self.snake.direction;
-        let opposite = (current + 2) % 4;
-
-        if direction != opposite {
-            self.snake.direction = direction;
-        }
-    }
 
     pub fn compute_fitness(&self, steps_survived: u32) -> f32 {
         let fruits_eaten = (self.snake.body.len() as u32).saturating_sub(1);

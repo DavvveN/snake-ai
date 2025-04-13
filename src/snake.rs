@@ -31,7 +31,7 @@ impl Snake {
 
     pub fn mv(&mut self, new_head_position: (i32, i32)) {
         // Move the body segments forward
-        let mut body_c = self.body.clone();
+        let body_c = self.body.clone();
 
         for i in (1..body_c.len()).rev() {
             self.body[i] = body_c[i - 1];
