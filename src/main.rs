@@ -14,7 +14,7 @@ use rand::Rng;
 use training_gui::TrainingState;
 
 const POP_SIZE: i32 = 100;
-const ITERATIONS : usize = 100;
+const ITERATIONS: usize = 100;
 
 pub fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -26,19 +26,22 @@ pub fn main() {
             .map(|_| Agent {
                 brain: Brain::random(),
                 fitness: 0.0,
-                score : 0,
-                id : rng.random(),
+                score: 0,
+                id: rng.random(),
             })
             .collect();
-        
-        for i in 0..ITERATIONS{
-            println!("Starting training cycle {} ...", i );
+
+        for i in 0..ITERATIONS {
+            println!("Starting training cycle {} ...", i);
             population = train_population(&mut population);
         }
 
         population.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
 
-        println!("\n Best Snake: \n fitness: {} \n Score: {}", population[0].fitness, population[0].score);
+        println!(
+            "\n Best Snake: \n fitness: {} \n Score: {}",
+            population[0].fitness, population[0].score
+        );
 
         let best_agent = population[0].clone();
 
@@ -48,12 +51,9 @@ pub fn main() {
             .window_setup(conf::WindowSetup::default().title("Snake-AI"))
             .window_mode(conf::WindowMode::default().resizable(true));
 
-        let (mut contex,event_loop) =
-            context_builder.build().expect("Failed to build context.");
+        let (mut contex, event_loop) = context_builder.build().expect("Failed to build context.");
         let state = TrainingState::new(&mut contex, best_agent).expect("Failed to create state.");
         event::run(contex, event_loop, state) // Run window event loop
-
-
     } else {
         println!("Opening Window ... ");
 
@@ -61,8 +61,7 @@ pub fn main() {
             .window_setup(conf::WindowSetup::default().title("Snake-AI"))
             .window_mode(conf::WindowMode::default().resizable(true));
 
-        let (mut contex,event_loop) =
-            context_builder.build().expect("Failed to build context.");
+        let (mut contex, event_loop) = context_builder.build().expect("Failed to build context.");
         let state = AppState::new(&mut contex).expect("Failed to create state.");
         event::run(contex, event_loop, state) // Run window event loop
     }
@@ -71,8 +70,12 @@ pub fn main() {
 pub fn train_population(population: &mut Vec<Agent>) -> Vec<Agent> {
     println!("Starting game on {} agents...", population.len());
 
+    // Generate multiple random seeds for testing
+    let mut rng = rand::rng();
+    let seeds: Vec<u64> = (0..5).map(|_| rng.random()).collect(); // Test on 5 different maps
+
     for agent in population.iter_mut() {
-        agent.run_game(5000);
+        agent.run_game(10000, &seeds);
     }
 
     println!("Evaluating Agents...");
@@ -112,4 +115,3 @@ pub fn train_population(population: &mut Vec<Agent>) -> Vec<Agent> {
 }
 
 mod tests;
-
